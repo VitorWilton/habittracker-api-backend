@@ -22,7 +22,7 @@ public class Habit {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY) // Muitos hábitos podem pertencer a um usuário
-    @JoinColumn(name = "user_id", nullable = false) // Chave estrangeira
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

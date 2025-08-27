@@ -1,11 +1,11 @@
 package br.com.portfolio.habittracker_api.model;
 
 import jakarta.persistence.*;
-import lombok.Data; // Do Lombok, para getters, setters, etc.
+import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "users") // Nome da tabela no banco
+@Table(name = "users")
 public class User {
 
     @Id

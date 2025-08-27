@@ -14,17 +14,16 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // Injetamos o codificador que criamos
+    private PasswordEncoder passwordEncoder;
 
     public User register(RegisterDTO registerDTO) {
-        // Lógica para verificar se o usuário já existe pode ser adicionada aqui
-
+        if (userRepository.findByUsername(registerDTO.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists!");
+        }
         User newUser = new User();
         newUser.setUsername(registerDTO.getUsername());
         newUser.setEmail(registerDTO.getEmail());
-        // Criptografando a senha antes de salvar!
         newUser.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
-
         return userRepository.save(newUser);
     }
 }

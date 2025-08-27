@@ -17,26 +17,44 @@ public class HabitService {
     private HabitRepository habitRepository;
 
     @Autowired
-    private UserRepository userRepository; // Precisamos para associar o hábito ao usuário
+    private UserRepository userRepository;
 
-    public List<Habit> getHabitsByUserId(Long userId) {
-        return habitRepository.findByUserId(userId);
+    /**
+     * Busca os hábitos de um usuário específico pelo seu username.
+     */
+    public List<Habit> getHabitsForUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o nome: " + username));
+        return habitRepository.findByUserId(user.getId());
     }
 
-    public Habit createHabit(HabitRequestDTO habitRequestDTO) {
-        // Busca o usuário no banco. Se não existir, lança uma exceção.
-        User user = userRepository.findById(habitRequestDTO.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public Habit createHabit(HabitRequestDTO habitRequestDTO, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o nome: " + username));
 
         Habit newHabit = new Habit();
         newHabit.setName(habitRequestDTO.getName());
         newHabit.setDescription(habitRequestDTO.getDescription());
+
         newHabit.setUser(user);
 
         return habitRepository.save(newHabit);
     }
 
-    public void deleteHabit(Long habitId) {
-        habitRepository.deleteById(habitId);
+    /**
+     * Deleta um hábito, garantindo que ele pertence ao usuário autenticado.
+     */
+    public void deleteHabit(Long habitId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado: " + username));
+
+        Habit habit = habitRepository.findById(habitId)
+                .orElseThrow(() -> new RuntimeException("Hábito não encontrado: " + habitId));
+
+        if (!habit.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("Acesso negado: Este hábito não pertence a você.");
+        }
+
+        habitRepository.delete(habit);
     }
 }
